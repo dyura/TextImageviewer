@@ -1,0 +1,414 @@
+package viewr.my.textimageviewer;
+
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.pdf.PdfRenderer;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
+import android.os.SystemClock;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+
+public class PdfRendererZoomFragment extends Fragment implements View.OnClickListener {
+    /* pdfrendererzoomfragment     */
+    /**
+     * Key string for saving the state of current page index.
+     */
+    private String targetPdf;
+//    private long mLastClickTime = 0;
+
+    private static final String STATE_CURRENT_PAGE_INDEX = "current_page_index";
+    /**
+     * The filename of the PDF.
+     */
+    public String FILENAME;
+    public String PURCHASE_ID;
+    public int TICKETS_NUMBER;
+    public Uri uri;
+
+    /**
+     * File descriptor of the PDF.
+     */
+    private ParcelFileDescriptor mFileDescriptor;
+
+    /**
+     * {@link android.graphics.pdf.PdfRenderer} to render the PDF.
+     */
+    private PdfRenderer mPdfRenderer;
+
+    /**
+     * Page that is currently shown on the screen.
+     */
+    private PdfRenderer.Page mCurrentPage;
+
+    /**
+     * {@link android.widget.ImageView} that shows a PDF page as a {@link android.graphics.Bitmap}
+     */
+    private ImageView mImageView;
+
+    /**
+     * {@link android.widget.Button} to move to the previous page.
+     */
+    private Button mButtonPrevious;
+    private ImageView mButtonZoomin;
+    private ImageView mButtonZoomout;
+    private Button mButtonNext;
+    private EditText mEdit;
+    private TextView mTextView;  // textView
+//    private float currentZoomLevel = 12;
+    private float currentZoomLevel = 6;
+
+    /**
+     * PDF page index
+     */
+    private int mPageIndex;
+
+    public PdfRendererZoomFragment() {
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.pdfrendererzoomfragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Retain view references.
+        mImageView = (ImageView) view.findViewById(R.id.image);
+        mButtonPrevious = (Button) view.findViewById(R.id.previous);
+        mButtonNext = (Button) view.findViewById(R.id.next);
+        mEdit = (EditText) view.findViewById(R.id.pageNumber);
+        mTextView = (TextView) view.findViewById(R.id.textView);
+        mButtonZoomin = view.findViewById(R.id.zoomin);
+        mButtonZoomout = view.findViewById(R.id.zoomout);
+
+        // Bind events.
+        mButtonPrevious.setOnClickListener(this);
+        mButtonNext.setOnClickListener(this);
+        mButtonZoomin.setOnClickListener(this);
+        mButtonZoomout.setOnClickListener(this);
+
+        mPageIndex = 0;
+        // If there is a savedInstanceState (screen orientations, etc.), we restore the page index.
+        if (null != savedInstanceState) {
+            mPageIndex = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
+        }
+//        mEdit.setOnClickListener(
+//                new View.OnClickListener()
+//                {
+//                    public void onClick(View view)
+//                    {
+////                        if (mEdit.getText().toString().trim().length() > 0) {
+//                            Log.v("EditText", mEdit.getText().toString());
+////                        showPage(Integer.getInteger(mEdit.getText().toString()));
+////                        }
+//                    }
+//                });
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        targetPdf=getActivity().getIntent().getStringExtra("uri");  // ?????
+        uri = Uri.parse(targetPdf) ;
+        File file = new File(uri.getPath());
+
+        FILENAME = new File(uri.getPath()).toString();
+//        TICKETS_NUMBER = getActivity().getIntent().getExtras().getInt("tickets_number");
+//        PURCHASE_ID = getActivity().getIntent().getExtras().getString("purchaseGuid");
+
+//        mEdit.setOnClickListener(
+//                new View.OnClickListener()
+//                {
+//                    public void onClick(View view)
+//                    {
+////                        if (mEdit.getText().toString().trim().length() > 0) {
+//                        Log.v("EditText", mEdit.getText().toString());
+//                        if (Integer.parseInt(mEdit.getText().toString())>0)
+//                        {
+//                            int page=Integer.parseInt(mEdit.getText().toString());
+//                        showPage(page-1);
+//                        }
+//                    }
+//                });
+
+        mEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if ( (actionId == EditorInfo.IME_ACTION_DONE) || ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && (event.getAction() == KeyEvent.ACTION_DOWN ))) {
+
+                    // Do stuff when user presses enter
+                    if (Integer.parseInt(mEdit.getText().toString())>0)
+                        {
+                            int page=Integer.parseInt(mEdit.getText().toString());
+                        showPage(page-1);
+                        }
+
+
+                }
+
+                return false;
+            }
+        });
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        try {
+            openRenderer(getActivity());
+            showPage(mPageIndex);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(getActivity(), "file is not found", Toast.LENGTH_SHORT).show();
+//            App app = (App) getActivity().getApplicationContext();
+//            TicketUtil.downloadTicket(app, PURCHASE_ID);
+            getActivity().finish();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        try {
+            closeRenderer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        super.onStop();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (null != mCurrentPage) {
+            outState.putInt(STATE_CURRENT_PAGE_INDEX, mCurrentPage.getIndex());
+        }
+    }
+
+    /**
+     * Sets up a {@link android.graphics.pdf.PdfRenderer} and related resources.
+     */
+    private void openRenderer(Context context) throws IOException {
+        // In this sample, we read a PDF from the assets directory.
+//        File file = new File(FILENAME);
+//        if (!file.exists()) {
+//            // Since PdfRenderer cannot handle the compressed asset file directly, we copy it into
+//            // the cache directory.
+//            InputStream asset = context.getAssets().open(FILENAME);
+//            FileOutputStream output = new FileOutputStream(file);
+//            final byte[] buffer = new byte[1024];
+//            int size;
+//            while ((size = asset.read(buffer)) != -1) {
+//                output.write(buffer, 0, size);
+//            }
+//            asset.close();
+//            output.close();
+//        }
+//        mFileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+        ContentResolver resolver = getActivity().getContentResolver();
+//        mFileDescriptor = this.getContentResolver().
+        mFileDescriptor = resolver.
+                openFileDescriptor(uri,"r");
+        // This is the PdfRenderer we use to render the PDF.
+        if (mFileDescriptor != null) {
+            mPdfRenderer = new PdfRenderer(mFileDescriptor);
+            String pref="";
+            if (mPdfRenderer.getPageCount()<10)
+                pref="    ";
+            else if (mPdfRenderer.getPageCount()<100)
+                pref="  ";
+            else if (mPdfRenderer.getPageCount()<1000)
+                pref=" ";
+
+            String str=pref+mPdfRenderer.getPageCount()+"\npages";
+            mTextView.setText(str);
+        }
+    }
+
+    /**
+     * Closes the {@link android.graphics.pdf.PdfRenderer} and related resources.
+     *
+     * @throws java.io.IOException When the PDF file cannot be closed.
+     */
+    private void closeRenderer() throws IOException {
+        if (null != mCurrentPage) {
+            mCurrentPage.close();
+            mCurrentPage = null;
+        }
+        if (null != mPdfRenderer) {
+            mPdfRenderer.close();
+        }
+        if (null != mFileDescriptor) {
+            mFileDescriptor.close();
+        }
+    }
+
+    /**
+     * Zoom level for zoom matrix depends on screen density (dpiAdjustedZoomLevel), but width and height of bitmap depends only on pixel size and don't depend on DPI
+     * Shows the specified page of PDF to the screen.
+     *
+     * @param index The page index.
+     */
+//    private void showPage(int index) {
+    public void showPage(int index) {
+        if (mPdfRenderer.getPageCount() <= index) {
+            return;
+        }
+        // Make sure to close the current page before opening another one.
+        if (null != mCurrentPage) {
+            mCurrentPage.close();
+        }
+        mEdit.setText(Integer.toString(index+1));
+        // Use `openPage` to open a specific page in PDF.
+        mCurrentPage = mPdfRenderer.openPage(index);
+        // Important: the destination bitmap must be ARGB (not RGB).
+        int newWidth;
+        int newHeight;
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT  ) {
+             newWidth = (int) (getResources().getDisplayMetrics().widthPixels * mCurrentPage.getWidth() / 72 * currentZoomLevel / 40);
+             newHeight = (int) (getResources().getDisplayMetrics().heightPixels * mCurrentPage.getHeight() / 72 * currentZoomLevel / 64);
+        }
+        else
+        {
+            newWidth = (int) (getResources().getDisplayMetrics().widthPixels * mCurrentPage.getWidth() / 72 * currentZoomLevel / 64);
+            newHeight = (int) (getResources().getDisplayMetrics().heightPixels * mCurrentPage.getHeight() / 72 * currentZoomLevel /40 );
+
+        }
+        Bitmap bitmap = Bitmap.createBitmap(
+                newWidth,
+                newHeight,
+                Bitmap.Config.ARGB_8888);
+        Matrix matrix = new Matrix();
+
+        float dpiAdjustedZoomLevel = currentZoomLevel * DisplayMetrics.DENSITY_MEDIUM / getResources().getDisplayMetrics().densityDpi;
+        matrix.setScale(dpiAdjustedZoomLevel, dpiAdjustedZoomLevel);
+/*
+//        Toast.makeText(getActivity(), "width " + String.valueOf(newWidth) + " widthPixels " + getResources().getDisplayMetrics().widthPixels, Toast.LENGTH_LONG).show();
+//        matrix.postTranslate(-rect.left/mCurrentPage.getWidth(), -rect.top/mCurrentPage.getHeight());
+*/
+
+        // Here, we render the page onto the Bitmap.
+        // To render a portion of the page, use the second and third parameter. Pass nulls to get
+        // the default result.
+        // Pass either RENDER_MODE_FOR_DISPLAY or RENDER_MODE_FOR_PRINT for the last parameter.
+//        mCurrentPage.render(bitmap, null, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+        mCurrentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY); // just testing
+
+//        Bitmap bitmap = Bitmap.createBitmap(mCurrentPage.getWidth(), mCurrentPage.getHeight(),  // just testng
+//         bitmap = Bitmap.createBitmap(mCurrentPage.getWidth(), mCurrentPage.getHeight(),  // just testng
+//                Bitmap.Config.ARGB_8888);
+//        mCurrentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+//        mCurrentPage.render(bitmap, null, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+        // We are ready to show the Bitmap to user.
+        mImageView.setImageBitmap(bitmap);
+        updateUi();
+    }
+
+    /**
+     * Updates the state of 2 control buttons in response to the current page index.
+     */
+    private void updateUi() {
+        int index = mCurrentPage.getIndex();
+        int pageCount = mPdfRenderer.getPageCount();
+        if (pageCount == 1) {
+            mButtonPrevious.setVisibility(View.GONE);
+            mButtonNext.setVisibility(View.GONE);
+        } else {
+            mButtonPrevious.setEnabled(0 != index);
+            mButtonNext.setEnabled(index + 1 < pageCount);
+        }
+        if (currentZoomLevel == 2) {
+            mButtonZoomout.setActivated(false);
+        } else {
+            mButtonZoomout.setActivated(true);
+        }
+//        enableButtons();
+    }
+
+    /**
+     * Gets the number of pages in the PDF. This method is marked as public for testing.
+     *
+     * @return The number of pages.
+     */
+    public int getPageCount() {
+        return mPdfRenderer.getPageCount();
+    }
+
+    @Override
+    public void onClick(View view) {
+//        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+//            return;
+//        }
+//        mLastClickTime = SystemClock.elapsedRealtime();
+//        Log.i("timer:","timer");
+        Log.i("currentZoomLevel:", Float.toString(currentZoomLevel));
+//        disableButtons();
+        switch (view.getId()) {
+            case R.id.previous: {
+                // Move to the previous page
+//                currentZoomLevel = 12;
+                showPage(mCurrentPage.getIndex() - 1);
+                break;
+            }
+            case R.id.next: {
+                // Move to the next page
+//                currentZoomLevel = 12;
+                showPage(mCurrentPage.getIndex() + 1);
+                break;
+            }
+            case R.id.zoomout: {
+                // Move to the next page
+                if (currentZoomLevel >=4)
+                --currentZoomLevel;
+                showPage(mCurrentPage.getIndex());
+                break;
+            }
+            case R.id.zoomin: {
+                // Move to the next page
+                if (currentZoomLevel <=18)
+                    ++currentZoomLevel;
+                showPage(mCurrentPage.getIndex());
+                break;
+            }
+        }
+    }
+
+//    private void disableButtons(){
+//        mButtonPrevious.setEnabled(false);  // just in case to avoid multiple tap
+//        mButtonNext.setEnabled(false);      // just in case to avoid multiple tap
+//        mButtonZoomin.setEnabled(false);
+//        mButtonZoomout.setEnabled(false);
+//    }
+//
+//    private void enableButtons(){
+//        mButtonZoomin.setEnabled(true);
+//        mButtonZoomout.setEnabled(true);
+//    }
+
+}
+
