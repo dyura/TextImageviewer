@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Text/Image viewer</string>
+    <string name="app_name">Text/Image Viewer</string>
     <string name="dialog_title_auth">confirm</string>
     <string name="dialog_msg_auth">confirmed</string>
 </resources>

@@ -18,7 +18,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class OpenPDFFile extends AppCompatActivity {
-//openpdffile
     String targetPdf = "storage/emulated/0/Download/BackFlightBooking.pdf";
 
     ImageView pdfView;
@@ -44,16 +43,11 @@ public class OpenPDFFile extends AppCompatActivity {
 
     private void openPDF() throws IOException {
 
-//        File file = new File(targetPdf);
         Uri uri2 = Uri.parse(targetPdf) ;
-        File file = new File(uri2.getPath());
-//        AssetFileDescriptor af = openAssetFile(uri2, mode);
 
         ParcelFileDescriptor fileDescriptor = null;
 
         try {
-//             fileDescriptor = ParcelFileDescriptor.open(
-//                    file, ParcelFileDescriptor.MODE_READ_ONLY);
             fileDescriptor= this.getContentResolver().
                     openFileDescriptor(uri2,"r");
         } catch (Exception e) {

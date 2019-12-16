@@ -50,14 +50,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mButtonSelect= (Button) findViewById(R.id.button2);
         mPin= (Button) findViewById(R.id.button3);
-//        if(Build.VERSION.SDK_INT>=24){
-//            try{
-//                Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
-//                m.invoke(null);
-//            }catch(Exception e){
-//                e.printStackTrace();
-//            }
-//        }
     }
 
 
@@ -82,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
 //        Toast.makeText(this.getApplicationContext(), "pinned???: " + Integer.toString(activityManager.getLockTaskModeState()), Toast.LENGTH_LONG).show();
-
 
     }
 
@@ -111,24 +102,17 @@ public class MainActivity extends AppCompatActivity {
             Uri uri = null;
             if (resultData != null) {
                 uri = resultData.getData();
-                Log.i(TAG, "Uri: " + uri.toString());
+                Log.d(TAG, "Uri: " + uri.toString());
                 Context context = this.getApplicationContext();
 //                Toast.makeText(context, "Uri: " + uri.toString(), Toast.LENGTH_LONG).show();
                 ContentResolver cr = context.getContentResolver();
                 String type = cr.getType(uri);
 //                Toast.makeText(context, "type: " + type, Toast.LENGTH_LONG).show();
-                Log.i("type:", type);
+                Log.d("type:", type);
                 String fileExt = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
 //                Toast.makeText(context, "fileExt: " + fileExt, Toast.LENGTH_LONG).show();
 
 
-/*
-                text/plain
-                application/pdf
-                image/png
-                image/jpeg
-                video/mp4
-*/
 
                 if (type.compareTo("text/plain") == 0 || type.compareTo("image/png") == 0 ||
                         type.compareTo("image/jpeg") == 0 || type.compareTo("video/mp4") == 0)
@@ -145,29 +129,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
         private void OpenHTMLViewer (Uri uri){
-            Log.i("text URI:", uri.toString());
+            Log.d("text URI:", uri.toString());
             MimeTypeMap mime = MimeTypeMap.getSingleton();
             String mimetype = mime.getMimeTypeFromExtension("txt");
 
             Intent htmlIntent = new Intent(Intent.ACTION_VIEW);
-//        htmlIntent.setDataAndType(uri, mimetype);
             htmlIntent.setData(uri);
 
             htmlIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            /*startActivity(htmlIntent);*/
-//        11-05 15:19:09.032 19405-19405/viewr.my.textimageviewer I/packageName:: com.google.android.apps.nbu.files
-//        11-05 15:19:09.032 19405-19405/viewr.my.textimageviewer I/name:: com.google.android.apps.nbu.files.gateway.preview.PreviewActivity
 
             final ComponentName componentName = new ComponentName("com.android.htmlviewer", "com.android.htmlviewer.HTMLViewerActivity");
-//  working!! final ComponentName componentName = new ComponentName("com.google.android.apps.nbu.files", "com.google.android.apps.nbu.files.gateway.preview.PreviewActivity");
 
-
-/*               not needed ????
-        htmlIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        htmlIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        htmlIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-*/
 
             htmlIntent.setComponent(componentName);
             startActivity(htmlIntent);
@@ -180,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
 
                 if (km.isKeyguardSecure()) {
                     Intent authIntent = km.createConfirmDeviceCredentialIntent(getString(R.string.dialog_title_auth), getString(R.string.dialog_msg_auth));
-//                startActivityForResult(authIntent, INTENT_AUTHENTICATE);
                     startActivityForResult(authIntent, 5);
                 }
             }
@@ -191,9 +163,7 @@ public class MainActivity extends AppCompatActivity {
         {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
-//        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
 
-//        intent.setType("text/plain");
             intent.setType("*/*");
             startActivityForResult(intent, READ_REQUEST_CODE);
         }

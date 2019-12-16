@@ -32,12 +32,7 @@ import java.io.InputStream;
 
 
 public class PdfRendererZoomFragment extends Fragment implements View.OnClickListener {
-    /* pdfrendererzoomfragment     */
-    /**
-     * Key string for saving the state of current page index.
-     */
     private String targetPdf;
-//    private long mLastClickTime = 0;
 
     private static final String STATE_CURRENT_PAGE_INDEX = "current_page_index";
     /**
@@ -77,7 +72,6 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
     private Button mButtonNext;
     private EditText mEdit;
     private TextView mTextView;  // textView
-//    private float currentZoomLevel = 12;
     private float currentZoomLevel = 6;
 
     /**
@@ -117,17 +111,6 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
         if (null != savedInstanceState) {
             mPageIndex = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
         }
-//        mEdit.setOnClickListener(
-//                new View.OnClickListener()
-//                {
-//                    public void onClick(View view)
-//                    {
-////                        if (mEdit.getText().toString().trim().length() > 0) {
-//                            Log.v("EditText", mEdit.getText().toString());
-////                        showPage(Integer.getInteger(mEdit.getText().toString()));
-////                        }
-//                    }
-//                });
     }
 
     @Override
@@ -135,26 +118,8 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
         super.onActivityCreated(savedInstanceState);
         targetPdf=getActivity().getIntent().getStringExtra("uri");  // ?????
         uri = Uri.parse(targetPdf) ;
-        File file = new File(uri.getPath());
 
         FILENAME = new File(uri.getPath()).toString();
-//        TICKETS_NUMBER = getActivity().getIntent().getExtras().getInt("tickets_number");
-//        PURCHASE_ID = getActivity().getIntent().getExtras().getString("purchaseGuid");
-
-//        mEdit.setOnClickListener(
-//                new View.OnClickListener()
-//                {
-//                    public void onClick(View view)
-//                    {
-////                        if (mEdit.getText().toString().trim().length() > 0) {
-//                        Log.v("EditText", mEdit.getText().toString());
-//                        if (Integer.parseInt(mEdit.getText().toString())>0)
-//                        {
-//                            int page=Integer.parseInt(mEdit.getText().toString());
-//                        showPage(page-1);
-//                        }
-//                    }
-//                });
 
         mEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -167,7 +132,6 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
                             int page=Integer.parseInt(mEdit.getText().toString());
                         showPage(page-1);
                         }
-
 
                 }
 
@@ -186,8 +150,6 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(getActivity(), "file is not found", Toast.LENGTH_SHORT).show();
-//            App app = (App) getActivity().getApplicationContext();
-//            TicketUtil.downloadTicket(app, PURCHASE_ID);
             getActivity().finish();
         }
     }
@@ -214,24 +176,7 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
      * Sets up a {@link android.graphics.pdf.PdfRenderer} and related resources.
      */
     private void openRenderer(Context context) throws IOException {
-        // In this sample, we read a PDF from the assets directory.
-//        File file = new File(FILENAME);
-//        if (!file.exists()) {
-//            // Since PdfRenderer cannot handle the compressed asset file directly, we copy it into
-//            // the cache directory.
-//            InputStream asset = context.getAssets().open(FILENAME);
-//            FileOutputStream output = new FileOutputStream(file);
-//            final byte[] buffer = new byte[1024];
-//            int size;
-//            while ((size = asset.read(buffer)) != -1) {
-//                output.write(buffer, 0, size);
-//            }
-//            asset.close();
-//            output.close();
-//        }
-//        mFileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
         ContentResolver resolver = getActivity().getContentResolver();
-//        mFileDescriptor = this.getContentResolver().
         mFileDescriptor = resolver.
                 openFileDescriptor(uri,"r");
         // This is the PdfRenderer we use to render the PDF.
@@ -274,7 +219,6 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
      *
      * @param index The page index.
      */
-//    private void showPage(int index) {
     public void showPage(int index) {
         if (mPdfRenderer.getPageCount() <= index) {
             return;
@@ -307,23 +251,13 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
 
         float dpiAdjustedZoomLevel = currentZoomLevel * DisplayMetrics.DENSITY_MEDIUM / getResources().getDisplayMetrics().densityDpi;
         matrix.setScale(dpiAdjustedZoomLevel, dpiAdjustedZoomLevel);
-/*
-//        Toast.makeText(getActivity(), "width " + String.valueOf(newWidth) + " widthPixels " + getResources().getDisplayMetrics().widthPixels, Toast.LENGTH_LONG).show();
-//        matrix.postTranslate(-rect.left/mCurrentPage.getWidth(), -rect.top/mCurrentPage.getHeight());
-*/
 
         // Here, we render the page onto the Bitmap.
         // To render a portion of the page, use the second and third parameter. Pass nulls to get
         // the default result.
         // Pass either RENDER_MODE_FOR_DISPLAY or RENDER_MODE_FOR_PRINT for the last parameter.
-//        mCurrentPage.render(bitmap, null, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
         mCurrentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY); // just testing
 
-//        Bitmap bitmap = Bitmap.createBitmap(mCurrentPage.getWidth(), mCurrentPage.getHeight(),  // just testng
-//         bitmap = Bitmap.createBitmap(mCurrentPage.getWidth(), mCurrentPage.getHeight(),  // just testng
-//                Bitmap.Config.ARGB_8888);
-//        mCurrentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-//        mCurrentPage.render(bitmap, null, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
         // We are ready to show the Bitmap to user.
         mImageView.setImageBitmap(bitmap);
         updateUi();
@@ -361,12 +295,7 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
-//        if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
-//            return;
-//        }
-//        mLastClickTime = SystemClock.elapsedRealtime();
-//        Log.i("timer:","timer");
-        Log.i("currentZoomLevel:", Float.toString(currentZoomLevel));
+        Log.d("currentZoomLevel:", Float.toString(currentZoomLevel));
 //        disableButtons();
         switch (view.getId()) {
             case R.id.previous: {
@@ -397,18 +326,6 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
             }
         }
     }
-
-//    private void disableButtons(){
-//        mButtonPrevious.setEnabled(false);  // just in case to avoid multiple tap
-//        mButtonNext.setEnabled(false);      // just in case to avoid multiple tap
-//        mButtonZoomin.setEnabled(false);
-//        mButtonZoomout.setEnabled(false);
-//    }
-//
-//    private void enableButtons(){
-//        mButtonZoomin.setEnabled(true);
-//        mButtonZoomout.setEnabled(true);
-//    }
 
 }
 
