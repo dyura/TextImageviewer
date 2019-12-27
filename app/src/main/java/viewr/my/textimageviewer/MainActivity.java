@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int READ_REQUEST_CODE = 42;
     private Button mButtonSelect;
     private Button mPin;
+    private Button mRotateon;
+    private Button mRotateoff;
 
 
     @Override
@@ -50,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mButtonSelect= (Button) findViewById(R.id.button2);
         mPin= (Button) findViewById(R.id.button3);
+        mRotateon= (Button) findViewById(R.id.rotateon);
+        mRotateoff= (Button) findViewById(R.id.rotateoff);
+
     }
 
 
@@ -62,6 +67,14 @@ public class MainActivity extends AppCompatActivity {
 
         activityManager = (ActivityManager)
                 this.getSystemService(Context.ACTIVITY_SERVICE);
+        if (android.provider.Settings.System.getInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0) == 1){
+            mRotateon.setEnabled(false);
+            mRotateoff.setEnabled(true);
+        } else {
+            mRotateon.setEnabled(true);
+            mRotateoff.setEnabled(false);
+        }
+
         if (activityManager.getLockTaskModeState()==0) {
 //            mButtonSelect.setText("Select file");
             mButtonSelect.setEnabled(true);
@@ -112,10 +125,8 @@ public class MainActivity extends AppCompatActivity {
                 String fileExt = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
 //                Toast.makeText(context, "fileExt: " + fileExt, Toast.LENGTH_LONG).show();
 
-
-
                 if (type.compareTo("text/plain") == 0 || type.compareTo("image/png") == 0 ||
-                        type.compareTo("image/jpeg") == 0 || type.compareTo("video/mp4") == 0)
+                        type.compareTo("image/gif") == 0 || type.compareTo("image/jpeg") == 0 || type.compareTo("video/mp4") == 0)
                     OpenHTMLViewer(uri);
 
                 if (type.compareTo("application/pdf") == 0) {
@@ -171,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
          public void Pin (View view)
          {
              startLockTask();
-
          }
 
     public void RotateOn (View view) {
@@ -181,6 +191,8 @@ public class MainActivity extends AppCompatActivity {
             if (retVal) {
                 Toast.makeText(this, "Rotatong on", Toast.LENGTH_LONG).show();
                 setAutoOrientationEnabled(getApplicationContext(),true);
+                mRotateon.setEnabled(false);
+                mRotateoff.setEnabled(true);
             } else {
                 Toast.makeText(this, "Write Settings not allowed", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
@@ -198,6 +210,8 @@ public class MainActivity extends AppCompatActivity {
             if (retVal) {
                 Toast.makeText(this, "Rotatong off", Toast.LENGTH_LONG).show();
                 setAutoOrientationEnabled(getApplicationContext(),false);
+                mRotateon.setEnabled(true);
+                mRotateoff.setEnabled(false);
             } else {
                 Toast.makeText(this, "Write Settings not allowed", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
