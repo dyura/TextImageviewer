@@ -2,4 +2,24 @@
     <string name="app_name">Text/Image Viewer</string>
     <string name="dialog_title_auth">confirm</string>
     <string name="dialog_msg_auth">confirmed</string>
+    <string name="display_help">Help</string>
+    <string name="display_about">About</string>
+    <string name="help">This viewer is designed to lock documents when handing over the phone to third parties. The locking mechanism is based on the standard Android screen pinning. Before using this application, you need to enable screen pinning:
+\n- Open your phone\'s Settings app.
+\n- Tap Security or Security &amp; location And then Advanced And then Screen pinning.
+\n- Turn on Screen pinning.
+\n\nThe application supports text files, JPG, PNG and GIF images, MP4 videos and PDF documents. \nFiles can be selected from local storage or from Google Drive.\n There are two options for selecting  the file: either the “Select File” button or the “Select File securely” button. The first button is available while the application is not pinned or immediately after pinning the application using Pin button. The “Select File securely” button is protected by a screen lock mechanism selected on your phone, or by fingerprint.
+\n\nTo enable / disable screen rotation  without leaving the pinned mode,  the application has “rotate on” and “rotate off” buttons. Screen rotating is a System Setting, so, when you first use “rotate on” and “rotate off” buttons, you will receive a pop-up screen asking you to allow changing the System Settings for this application.
+\n\nThere are two options for pin this application. One of them is to open the file, and then perform the standard Android “Pin a screen” operation. \n(https://support.google.com/android/answer/9455138?hl=en )
+The second option is to use the “Pin” button in this application. Then you will see the standard Android dialog with two options: confirm pinning by tapping somewhere outside this dialog or cancel pinning by pressing “No thanks”. \nEnsure that the application is successfully pinned before you will hand over the phone. There is a good indication. If the screen is pinned, the status bar is blank with notifications and system information hidden.
+\n\nText files, images and videos are opened by the standard Android HTML viewer which supports pinch to zoom and screen scrolling.  PDF documents are open by an internal PDF viewer. The viewer supports zooming and paging with the intuitive button interface. There is also the option to go directly to a specific page number.
+   \n </string>
+    <string name="about">\n
+        Version 1.0 (2019)\n\n
+        Author: Yury Dubinsky \n\n
+        Email: small.mobile.tools@gmail.com \n\n
+        This viewer is free and open source. \n\n https://github.com/dyura/TextImageviewer \n\n\n
+        _______________________________________________________________________
+    </string>
+
 </resources>

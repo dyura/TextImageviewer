@@ -8,6 +8,7 @@ import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -19,9 +20,12 @@ import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
@@ -29,6 +33,7 @@ import android.app.Activity;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -55,6 +60,58 @@ public class MainActivity extends AppCompatActivity {
         mRotateOn= findViewById(R.id.rotateon);
         mRotateOff= findViewById(R.id.rotateoff);
 
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_layout, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.display_help:
+//                Toast.makeText(context, "show info...", Toast.LENGTH_LONG).show();
+//                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+//                alertDialog.setTitle("Help");
+//                alertDialog.setMessage(getString(R.string.help));
+//                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                dialog.dismiss();
+//                            }
+//                        });
+//                alertDialog.show();
+                TextView showTextHelp = new TextView(this);
+                showTextHelp.setText(getString(R.string.help));
+                showTextHelp.setTextIsSelectable(true);
+                showTextHelp.setTextSize(16);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+// Build the Dialog
+                builder.setView(showTextHelp)
+                        .setTitle("Help")
+                        .setCancelable(true)
+                        .show()
+                        .getWindow().setLayout(700, 1000);
+
+                return true;
+            case R.id.display_about:
+                TextView showTextAbout = new TextView(this);
+                showTextAbout.setText(getString(R.string.about));
+                showTextAbout.setTextIsSelectable(true);
+                showTextAbout.setTextSize(16);
+                AlertDialog.Builder builderAbout = new AlertDialog.Builder(this);
+// Build the Dialog
+                builderAbout.setView(showTextAbout)
+                        .setTitle(getString(R.string.app_name))
+                        .setCancelable(true)
+                        .show()
+                        .getWindow().setLayout(1600, 1000);
+                return true;
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 
