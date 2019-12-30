@@ -30,6 +30,7 @@ import android.view.View;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.app.Activity;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
@@ -91,7 +92,9 @@ public class MainActivity extends AppCompatActivity {
                         .setTitle("Help")
                         .setCancelable(true)
                         .show()
-                        .getWindow().setLayout(700, 1000);
+//                        .getWindow().setLayout(700, 1000);
+                .getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
 
                 return true;
             case R.id.display_about:
@@ -104,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
                 builderAbout.setView(showTextAbout)
                         .setTitle(getString(R.string.app_name))
                         .setCancelable(true)
-                        .show()
-                        .getWindow().setLayout(1600, 1000);
+                        .show();
+//                        .getWindow().setLayout(1600, 1000);
                 return true;
             default:
                 // If we got here, the user's action was not recognized.
