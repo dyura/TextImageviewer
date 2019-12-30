@@ -42,18 +42,18 @@ public class MainActivity extends AppCompatActivity {
     private static final int READ_REQUEST_CODE = 42;
     private Button mButtonSelect;
     private Button mPin;
-    private Button mRotateon;
-    private Button mRotateoff;
+    private Button mRotateOn;
+    private Button mRotateOff;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mButtonSelect= (Button) findViewById(R.id.button2);
-        mPin= (Button) findViewById(R.id.button3);
-        mRotateon= (Button) findViewById(R.id.rotateon);
-        mRotateoff= (Button) findViewById(R.id.rotateoff);
+        mButtonSelect= findViewById(R.id.button2);
+        mPin= findViewById(R.id.button3);
+        mRotateOn= findViewById(R.id.rotateon);
+        mRotateOff= findViewById(R.id.rotateoff);
 
     }
 
@@ -64,15 +64,14 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d("tag", "This screen is back");
         ActivityManager activityManager;
-
         activityManager = (ActivityManager)
                 this.getSystemService(Context.ACTIVITY_SERVICE);
         if (android.provider.Settings.System.getInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0) == 1){
-            mRotateon.setEnabled(false);
-            mRotateoff.setEnabled(true);
+            mRotateOn.setEnabled(false);
+            mRotateOff.setEnabled(true);
         } else {
-            mRotateon.setEnabled(true);
-            mRotateoff.setEnabled(false);
+            mRotateOn.setEnabled(true);
+            mRotateOff.setEnabled(false);
         }
 
         if (activityManager.getLockTaskModeState()==0) {
@@ -112,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             // Instead, a URI to that document will be contained in the return intent
             // provided to this method as a parameter.
             // Pull that URI using resultData.getData().
-            Uri uri = null;
+            Uri uri;
             if (resultData != null) {
                 uri = resultData.getData();
                 Log.d(TAG, "Uri: " + uri.toString());
@@ -159,16 +158,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void LockedSelectFile (View view){
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                KeyguardManager km = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+            KeyguardManager km = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
 
-                if (km.isKeyguardSecure()) {
-                    Intent authIntent = km.createConfirmDeviceCredentialIntent(getString(R.string.dialog_title_auth), getString(R.string.dialog_msg_auth));
-                    startActivityForResult(authIntent, 5);
-                }
+            if (km.isKeyguardSecure()) {
+                Intent authIntent = km.createConfirmDeviceCredentialIntent(getString(R.string.dialog_title_auth), getString(R.string.dialog_msg_auth));
+                startActivityForResult(authIntent, 5);
             }
+         }
 
-        }
 
         private void SelectFile ()
         {
@@ -191,8 +188,8 @@ public class MainActivity extends AppCompatActivity {
             if (retVal) {
                 Toast.makeText(this, "Rotatong on", Toast.LENGTH_LONG).show();
                 setAutoOrientationEnabled(getApplicationContext(),true);
-                mRotateon.setEnabled(false);
-                mRotateoff.setEnabled(true);
+                mRotateOn.setEnabled(false);
+                mRotateOff.setEnabled(true);
             } else {
                 Toast.makeText(this, "Write Settings not allowed", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
@@ -210,8 +207,8 @@ public class MainActivity extends AppCompatActivity {
             if (retVal) {
                 Toast.makeText(this, "Rotatong off", Toast.LENGTH_LONG).show();
                 setAutoOrientationEnabled(getApplicationContext(),false);
-                mRotateon.setEnabled(true);
-                mRotateoff.setEnabled(false);
+                mRotateOn.setEnabled(true);
+                mRotateOff.setEnabled(false);
             } else {
                 Toast.makeText(this, "Write Settings not allowed", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
