@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Text/Image Viewer</string>
-    <string name="dialog_title_auth">confirm</string>
-    <string name="dialog_msg_auth">confirmed</string>
+    <string name="dialog_title_auth">Unlock</string>
+    <string name="dialog_msg_auth">Enter pin or use the finger</string>
     <string name="display_help">Help</string>
     <string name="display_about">About</string>
     <string name="help"> This viewer is designed to lock documents when handing over the phone to third parties. The locking mechanism is based on the standard Android screen pinning. Before using this application, you need to enable screen pinning:
