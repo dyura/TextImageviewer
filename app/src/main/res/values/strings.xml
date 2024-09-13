@@ -13,12 +13,16 @@
 \n\n\ \  There are two options for pin this application. One of them is to open the file, and then perform the standard Android “Pin a screen” operation. \n( https://support.google.com/android/answer/9455138?hl=en )
 The second option is to use the “Pin” button in this application. Then you will see the standard Android dialog with two options: confirm pinning by tapping somewhere outside this dialog or cancel pinning by pressing “No thanks”. \nEnsure that the application is successfully pinned before you will hand over the phone. There is a good indication. If the screen is pinned, the status bar is blank with notifications and system information hidden.
 \n\n\ \  Text files, images and videos are opened by the standard Android HTML viewer which supports pinch to zoom and screen scrolling.  PDF documents are open by an internal PDF viewer. The viewer supports zooming and paging with the intuitive button interface. There is also the option to go directly to a specific page number.
-   \n </string>
+   \n All suported files can be opened from any file manager or Home Screen shortcuts via \"Open With\" dialog. Images and videos can also be open directly from any messenger or email client via \"Share with\" dialog. \n
+More info is on the app Web page. The link is in the \"About\" section. \n
+</string>
     <string name="about">\n
-        Version 1.0 (2019)\n\n
+        Version 2.0 (2024)\n\n
         Author: Yury Dubinsky \n\n
         Email: small.mobile.tools@gmail.com \n\n
-        This viewer is free and open source. \n\n https://github.com/dyura/TextImageviewer \n\n\n
+        This viewer is free and open source. \n\n https://github.com/dyura/TextImageviewer \n
+        Application Info and Tips: https://sites.google.com/view/tips-for-using-secure-viewer/home \n
+         (Text can be copied)\n\n
         _______________________________________________________________________
     </string>
 

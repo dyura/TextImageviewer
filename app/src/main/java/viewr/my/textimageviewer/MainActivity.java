@@ -1,5 +1,10 @@
 // pinable text/image viewer for the safe document display
 package viewr.my.textimageviewer;
+/*
+ todo: add audio
+ **todo: default zoom in html viewer
+ todo: resolve samsungs security problem
+*/
 
 import android.app.ActivityManager;
 import android.app.FragmentManager;
@@ -24,6 +29,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,18 +56,53 @@ public class MainActivity extends AppCompatActivity {
     private Button mPin;
     private Button mRotateOn;
     private Button mRotateOff;
+    ActivityManager activityManager;
+    private Uri last_uri;
+    private String last_type;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mButtonSelect= findViewById(R.id.button2);
-        mPin= findViewById(R.id.button3);
-        mRotateOn= findViewById(R.id.rotateon);
-        mRotateOff= findViewById(R.id.rotateoff);
 
+//        Intent intent2 = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);  //???????
+//        startActivity(intent2);
+
+        mButtonSelect = findViewById(R.id.button2);
+        mPin = findViewById(R.id.button3);
+        mRotateOn = findViewById(R.id.rotateon);
+        mRotateOff = findViewById(R.id.rotateoff);
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        Toast.makeText(this.getApplicationContext(), "Action "+action, Toast.LENGTH_LONG).show();  // debug
+        String type = intent.getType();
+        Uri uri=null;
+        activityManager = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
+        if (type != null) {
+            Log.d("type:", type);
+            if (Intent.ACTION_VIEW.equals(action)) {
+                uri = intent.getData();}
+            else {
+                uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            }
+            if (type.contains("text/") || type.contains("image/") || type.contains("video/"))
+                    OpenHTMLViewer(uri);
+            if (type.compareTo("application/pdf") == 0) {
+//                    Intent viewpdf = new Intent(this, OpenPDFFile.class);
+                    Intent viewpdf = new Intent(this, openPDFFileScroll.class);
+                    viewpdf.putExtra("uri", uri.toString());
+                startActivity(viewpdf);
+                    last_uri = uri;
+                    last_type = "pdf";
+            }
+        }
+        else {
+            Log.d("type:", "type is null");
+        }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_layout, menu);
@@ -122,11 +163,8 @@ public class MainActivity extends AppCompatActivity {
     public void onResume()
     {
         super.onResume();
-        Log.d("tag", "This screen is back");
-        ActivityManager activityManager;
-        activityManager = (ActivityManager)
-                this.getSystemService(Context.ACTIVITY_SERVICE);
-        if (android.provider.Settings.System.getInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0) == 1){
+        if (last_uri != null)
+            if (android.provider.Settings.System.getInt(getContentResolver(), Settings.System.ACCELEROMETER_ROTATION, 0) == 1){
             mRotateOn.setEnabled(false);
             mRotateOff.setEnabled(true);
         } else {
@@ -145,9 +183,16 @@ public class MainActivity extends AppCompatActivity {
             mPin.setEnabled(false);
         }
 
-//        Toast.makeText(this.getApplicationContext(), "pinned???: " + Integer.toString(activityManager.getLockTaskModeState()), Toast.LENGTH_LONG).show();
-
     }
+
+    @Override
+    public void onBackPressed() {
+        if (activityManager.getLockTaskModeState() == 0) {
+            super.onBackPressed();
+        }
+    }
+
+
 
     public void selectFile(View view) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -179,13 +224,14 @@ public class MainActivity extends AppCompatActivity {
 //                Toast.makeText(context, "Uri: " + uri.toString(), Toast.LENGTH_LONG).show();
                 ContentResolver cr = context.getContentResolver();
                 String type = cr.getType(uri);
-//                Toast.makeText(context, "type: " + type, Toast.LENGTH_LONG).show();
                 Log.d("type:", type);
                 String fileExt = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
 //                Toast.makeText(context, "fileExt: " + fileExt, Toast.LENGTH_LONG).show();
 
-                if (type.compareTo("text/plain") == 0 || type.compareTo("image/png") == 0 ||
-                        type.compareTo("image/gif") == 0 || type.compareTo("image/jpeg") == 0 || type.compareTo("video/mp4") == 0)
+//                if (type.compareTo("text/plain") == 0 || type.compareTo("image/png") == 0 ||
+//                        type.compareTo("image/gif") == 0 || type.compareTo("image/jpeg") == 0 || type.compareTo("video/mp4") == 0)
+//                    OpenHTMLViewer(uri);
+                if (type.contains("text/") || type.contains("image/")  || type.contains("video/"))
                     OpenHTMLViewer(uri);
 
                 if (type.compareTo("application/pdf") == 0) {
@@ -193,13 +239,16 @@ public class MainActivity extends AppCompatActivity {
                     Intent viewpdf = new Intent(this, openPDFFileScroll.class);
                     viewpdf.putExtra("uri",uri.toString());
                     startActivity(viewpdf);
+                    last_uri=uri;
+                    last_type="pdf";
                 }
             }
         }
     }
 
         private void OpenHTMLViewer (Uri uri){
-            Log.d("text URI:", uri.toString());
+            Log.d("text/image/video URI:", uri.toString());
+            Toast.makeText(this.getApplicationContext(), "Original size.Adjust zoom level as needed", Toast.LENGTH_LONG).show();
             MimeTypeMap mime = MimeTypeMap.getSingleton();
             String mimetype = mime.getMimeTypeFromExtension("txt");
 
@@ -213,8 +262,12 @@ public class MainActivity extends AppCompatActivity {
 
 
             htmlIntent.setComponent(componentName);
-            startActivity(htmlIntent);
 
+//            htmlIntent.getComponent().getClassame().
+
+            startActivity(htmlIntent);
+            last_uri=uri;
+            last_type="notpdf";
         }
 
         public void LockedSelectFile (View view){
@@ -240,6 +293,18 @@ public class MainActivity extends AppCompatActivity {
          {
              startLockTask();
          }
+
+    public void reopen (View view) {
+        if (last_uri != null) {
+            if (!last_type.equals("pdf")) {
+                OpenHTMLViewer(last_uri);
+            } else {
+                Intent viewpdf = new Intent(this, openPDFFileScroll.class);
+                viewpdf.putExtra("uri", last_uri.toString());
+                startActivity(viewpdf);
+            }
+        }
+    }
 
     public void RotateOn (View view) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

@@ -12,6 +12,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -86,6 +88,7 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.pdfrendererzoomfragment, container, false);
+
     }
 
     @Override
@@ -100,6 +103,8 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
         mButtonZoomin = view.findViewById(R.id.zoomin);
         mButtonZoomout = view.findViewById(R.id.zoomout);
 
+
+
         // Bind events.
         mButtonPrevious.setOnClickListener(this);
         mButtonNext.setOnClickListener(this);
@@ -110,6 +115,17 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
         // If there is a savedInstanceState (screen orientations, etc.), we restore the page index.
         if (null != savedInstanceState) {
             mPageIndex = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
+
+//            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);  // no afect
+
+
+//      ActionBar actionBar = getActionBar();
+//
+//            getActionBar().setDisplayShowHomeEnabled(false);
+
+
+
         }
     }
 
@@ -118,6 +134,7 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
         super.onActivityCreated(savedInstanceState);
         targetPdf=getActivity().getIntent().getStringExtra("uri");  // ?????
         uri = Uri.parse(targetPdf) ;
+        Log.d("pdf URI:", uri.toString());
 
         FILENAME = new File(uri.getPath()).toString();
 
@@ -144,13 +161,23 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
     @Override
     public void onStart() {
         super.onStart();
-        try {
+        try {           // The fix for the SecurityException
             openRenderer(getActivity());
-            showPage(mPageIndex);
+            if (null != mFileDescriptor) {
+                showPage(mPageIndex);
+            } else
+                Toast.makeText(getActivity(), "SYSTEM BUG. Don't open PDF using Downloads in Open From", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "SYSTEM BUG. Don't open PDF using Downloads in Open From", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "SYSTEM BUG. Don't open PDF using Downloads in Open From", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(getActivity(), "file is not found", Toast.LENGTH_SHORT).show();
             getActivity().finish();
+//          /*  I was getting errors like this
+//          java.lang.SecurityException: com.android.providers.downloads has no access to content://media/external_primary/file/1000041077
+//	        content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fkept%2FDUBINSKY-%20YURY%20(1).pdf
+//	        java.lang.SecurityException: com.android.providers.downloads has no access to content://media/external_primary/file/1000041077
+//           */
         }
     }
 
@@ -177,8 +204,14 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
      */
     private void openRenderer(Context context) throws IOException {
         ContentResolver resolver = getActivity().getContentResolver();
-        mFileDescriptor = resolver.
-                openFileDescriptor(uri,"r");
+        try {
+            mFileDescriptor = resolver.openFileDescriptor(uri, "r");
+        } catch (SecurityException e ) {
+            e.printStackTrace();
+//            Toast.makeText(getActivity(), "error" + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.d("error:", e.getMessage());
+//            getActivity().finish();
+        }
         // This is the PdfRenderer we use to render the PDF.
         if (mFileDescriptor != null) {
             mPdfRenderer = new PdfRenderer(mFileDescriptor);
@@ -259,6 +292,7 @@ public class PdfRendererZoomFragment extends Fragment implements View.OnClickLis
         mCurrentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY); // just testing
 
         // We are ready to show the Bitmap to user.
+//        mImageView.dispatchKeyEvent()
         mImageView.setImageBitmap(bitmap);
         updateUi();
     }

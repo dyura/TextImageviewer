@@ -1,9 +1,13 @@
 package viewr.my.textimageviewer;
 
+import android.app.ActionBar;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class openPDFFileScroll extends AppCompatActivity {
 
@@ -14,12 +18,15 @@ public class openPDFFileScroll extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.openpdffilescroll);
 
-        if (savedInstanceState == null) {
+         getSupportActionBar().setDisplayHomeAsUpEnabled(false); 
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // debugging
+
+//        if (savedInstanceState == null) {  ????
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, new PdfRendererZoomFragment(),
                             FRAGMENT_PDF_RENDERER_BASIC)
                     .commit();
-        }
+//        }
     }
 
     @Override
@@ -27,6 +34,6 @@ public class openPDFFileScroll extends AppCompatActivity {
     {
         super.onStart();
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-    }
+   }
 
 }
